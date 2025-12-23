@@ -28,11 +28,15 @@ function App() {
   const handleDeleteTask = (taskToDelete: Task) => {
     setTasks(prev => prev.filter(t => (t.id !== taskToDelete.id)));
   }
+
+  const handleAddNewTask = (newTask: Task) => {
+    setTasks([...tasks, newTask]);
+  }
   
   return (
     <div className="app-root">
       <h1>To Do List</h1>
-      <TasksTable tasks={tasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask}/>
+      <TasksTable tasks={tasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onAddNewTask={handleAddNewTask}/>
     </div>
   )
 }

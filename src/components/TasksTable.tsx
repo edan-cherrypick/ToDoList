@@ -16,27 +16,39 @@ import {
     Paper,
     TableContainer,
     Modal,
+    Box
   } from '@mui/material';
 import TaskDetail from './TaskDetail';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+
+let id: number = 0;
 
 
 export default function TasksTable({
     tasks,
     onSaveTask,
     onDeleteTask,
-  }: { tasks: Task[]; onSaveTask: (task: Task) => void; onDeleteTask: (task: Task) => void }) {
+    onAddNewTask
+  }: { tasks: Task[]; onSaveTask: (task: Task) => void; onDeleteTask: (task: Task) => void; onAddNewTask: (task: Task) => void }) {
     const [sortBy, setSortBy] = useState<SortingState>([{id: 'dueDate', desc: false}]);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [mode, setMode] = useState<string>("edit");
     
     const handleEditButton = (task: Task) => {
+        setMode("edit");
         setEditingTask(task);
         setOpenModal(true);
     };
 
-    
+    const handleNewTaskButton = () => {
+        setMode("new");
+        setEditingTask({id: id++, description: "", dueDate: new Date(), priority: 1, completed:false});
+        setOpenModal(true);
+    }
     
     const columns: ColumnDef<Task>[] = [
         {
@@ -89,64 +101,83 @@ export default function TasksTable({
 
     return (
       <>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
-                    if (header.isPlaceholder) return null;
-                    const canSort = header.column.getCanSort();
-                    const isSorted = header.column.getIsSorted(); // 'asc' | 'desc' | false
+      <Box>
+            <TableContainer component={Paper}>
+            <Table>
+                <TableHead>
+                {table.getHeaderGroups().map(headerGroup => (
+                    <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map(header => {
+                        if (header.isPlaceholder) return null;
+                        const canSort = header.column.getCanSort();
+                        const isSorted = header.column.getIsSorted(); // 'asc' | 'desc' | false
 
-                    return (
-                      <TableCell key={header.id}>
-                        {canSort ? (
-                          <TableSortLabel
-                            active={!!isSorted}
-                            direction={isSorted === 'desc' ? 'desc' : 'asc'}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
+                        return (
+                        <TableCell key={header.id}>
+                            {canSort ? (
+                            <TableSortLabel
+                                active={!!isSorted}
+                                direction={isSorted === 'desc' ? 'desc' : 'asc'}
+                                onClick={header.column.getToggleSortingHandler()}
+                            >
+                                {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                                )}
+                            </TableSortLabel>
+                            ) : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
                             )}
-                          </TableSortLabel>
-                        ) : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHead>
+                        </TableCell>
+                        );
+                    })}
+                    </TableRow>
+                ))}
+                </TableHead>
 
-            <TableBody>
-              {table.getRowModel().rows.map(row => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {editingTask && (
-            <Modal open={openModal} onClose={() => setOpenModal(false)}>
-                <TaskDetail
-                    editingTask={editingTask}
-                    setEditingTask={setEditingTask}
-                    onSaveTask={onSaveTask}
-                    onDeleteTask={onDeleteTask}
-                    setOpenModal={setOpenModal}
-                />
-            </Modal>
-        )}
+                <TableBody>
+                {table.getRowModel().rows.map(row => (
+                    <TableRow key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                    ))}
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            </TableContainer>
+            <Box
+                sx={{
+                display: "flex",
+                justifyContent: "center",
+                mt: 3,
+                }}
+            >
+                <Fab
+                color="primary"
+                aria-label="add task"
+                onClick={handleNewTaskButton}
+                >
+                    <AddIcon />
+                </Fab>
+            </Box>
+            {editingTask && (
+                <Modal open={openModal} onClose={() => setOpenModal(false)}>
+                    <TaskDetail
+                        editingTask={editingTask}
+                        setEditingTask={setEditingTask}
+                        onSaveTask={onSaveTask}
+                        onDeleteTask={onDeleteTask}
+                        setOpenModal={setOpenModal}
+                        onAddNewTask={onAddNewTask}
+                        mode={mode}
+                    />
+                </Modal>
+            )}
+        </Box>    
       </>
     );
 }

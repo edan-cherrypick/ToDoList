@@ -22,6 +22,8 @@ type Props = {
     onSaveTask: (task: Task) => void
     onDeleteTask: (task: Task) => void 
     setOpenModal: (open: boolean) => void
+    onAddNewTask: (task: Task) => void
+    mode: string
   }
 
 
@@ -31,6 +33,8 @@ export default function TaskDetail({
     onSaveTask,
     onDeleteTask,
     setOpenModal,
+    onAddNewTask,
+    mode,
   }: Props) {
 
     const handleSaveButton = () => { 
@@ -40,6 +44,11 @@ export default function TaskDetail({
 
     const handleDeleteButton = () => {
         if(editingTask) onDeleteTask(editingTask);
+        setOpenModal(false);
+    }
+
+    const handleAddNewTask = () => {
+        if(editingTask) onAddNewTask(editingTask);
         setOpenModal(false);
     }
 
@@ -129,31 +138,42 @@ export default function TaskDetail({
                 </Box>
                 <Box
                     sx={{
-                    display: 'flex',
+                    display: "flex",
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: 2,
                     mt: 3,
                     }}
                 >
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                        variant="contained"
-                        onClick={handleSaveButton}
-                        disabled={editingTask.description.trim().length === 0}
-                    >
-                        Save
-                    </Button>
-                    <Button
-                        color="error"
-                        onClick={handleDeleteButton}
-                    >
-                        Delete Task
-                    </Button>
+                    <Box sx={{ display: mode === "new" ? "none" : "flex", gap: 1 }}>
+                        <Button
+                            variant="contained"
+                            onClick={handleSaveButton}
+                            disabled={editingTask.description.trim().length === 0}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            color="error"
+                            onClick={handleDeleteButton}
+                        >
+                            Delete Task
+                        </Button>
                     </Box>
-
+                    <Box
+                        sx={{
+                            display: mode === "edit" ? "none" : "flex", gap: 1
+                        }}>
+                            <Button
+                            variant="contained"
+                            onClick={handleAddNewTask}
+                            disabled={editingTask.description.trim().length === 0}
+                            >
+                            Save
+                        </Button>
+                    </Box>
                     <Button onClick={() => setOpenModal(false)}>
-                    Cancel
+                        Cancel
                     </Button>
                 </Box>
             </Box>
