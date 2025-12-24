@@ -38,17 +38,23 @@ export default function TaskDetail({
   }: Props) {
 
     const handleSaveButton = () => { 
-        if(editingTask) onSaveTask(editingTask);
+        if(editingTask) {
+            onSaveTask(editingTask)
+        };
         setOpenModal(false);
     };
 
     const handleDeleteButton = () => {
-        if(editingTask) onDeleteTask(editingTask);
+        if(editingTask) {
+            onDeleteTask(editingTask)
+        };
         setOpenModal(false);
     }
 
     const handleAddNewTask = () => {
-        if(editingTask) onAddNewTask(editingTask);
+        if(editingTask) {
+            onAddNewTask(editingTask)
+        };
         setOpenModal(false);
     }
 
