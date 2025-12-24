@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import { type ChangeEvent } from 'react';
 import type { Task } from '../types';
 import { Typography,
     Box,

@@ -3,52 +3,35 @@ import type { Task } from '../types';
 import { priorityLabelByValue } from '../types';
 import { useReactTable,
     getCoreRowModel,
-    getSortedRowModel,
-    flexRender, } from '@tanstack/react-table';
+    getSortedRowModel, } from '@tanstack/react-table';
 import type { SortingState, ColumnDef } from '@tanstack/react-table';
-import {
-    Table,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
-    TableSortLabel,
-    Paper,
-    TableContainer,
-    Modal,
-    Box
-  } from '@mui/material';
-import TaskDetail from './TaskDetail';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
-
-let id: number = 0;
-
+import { useTheme, useMediaQuery } from "@mui/material";
+import MobileTable from './MobileTable';
+import DesktopTable from './DesktopTable';
 
 export default function TasksTable({
     tasks,
-    onSaveTask,
-    onDeleteTask,
-    onAddNewTask
-  }: { tasks: Task[]; onSaveTask: (task: Task) => void; onDeleteTask: (task: Task) => void; onAddNewTask: (task: Task) => void }) {
+    setMode,
+    setEditingTask,
+    setOpenModal,
+  }: { tasks: Task[]; onSaveTask: (task: Task) => void; 
+    onDeleteTask: (task: Task) => void; 
+    onAddNewTask: (task: Task) => void;
+    setMode: (newMode: string) => void;
+    setEditingTask: (task: Task) => void;
+    setOpenModal: (val: boolean) => void }) {
     const [sortBy, setSortBy] = useState<SortingState>([{id: 'dueDate', desc: false}]);
-    const [editingTask, setEditingTask] = useState<Task | null>(null);
-    const [openModal, setOpenModal] = useState<boolean>(false);
-    const [mode, setMode] = useState<string>("edit");
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     
     const handleEditButton = (task: Task) => {
         setMode("edit");
-        setEditingTask(task);
+        setEditingTask({...task});
         setOpenModal(true);
     };
-
-    const handleNewTaskButton = () => {
-        setMode("new");
-        setEditingTask({id: id++, description: "", dueDate: new Date(), priority: 1, completed:false});
-        setOpenModal(true);
-    }
     
     const columns: ColumnDef<Task>[] = [
         {
@@ -71,15 +54,15 @@ export default function TasksTable({
             header: 'Date',
             sortingFn: 'datetime',
             cell: ({ getValue }) => {
-                const value = getValue<Date>();        // this is your Date object
-                return value.toLocaleDateString('en-GB'); // dd/mm/yyyy
+                const value = getValue<Date>();        
+                return value.toLocaleDateString('en-GB');
             },
         },
         {
             accessorKey: 'priority',
             header: 'Priority',
-            cell: ({ row }) => priorityLabelByValue[row.original.priority], //translate priority to label
-            sortingFn: 'basic',  // <-- sort by numeric priority (1,2,3)
+            cell: ({ row }) => priorityLabelByValue[row.original.priority],
+            sortingFn: 'basic', 
         },
         {
             accessorKey: 'completed', 
@@ -99,85 +82,5 @@ export default function TasksTable({
         getSortedRowModel: getSortedRowModel(),
     })
 
-    return (
-      <>
-      <Box>
-            <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                {table.getHeaderGroups().map(headerGroup => (
-                    <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => {
-                        if (header.isPlaceholder) return null;
-                        const canSort = header.column.getCanSort();
-                        const isSorted = header.column.getIsSorted(); // 'asc' | 'desc' | false
-
-                        return (
-                        <TableCell key={header.id}>
-                            {canSort ? (
-                            <TableSortLabel
-                                active={!!isSorted}
-                                direction={isSorted === 'desc' ? 'desc' : 'asc'}
-                                onClick={header.column.getToggleSortingHandler()}
-                            >
-                                {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                                )}
-                            </TableSortLabel>
-                            ) : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                            )}
-                        </TableCell>
-                        );
-                    })}
-                    </TableRow>
-                ))}
-                </TableHead>
-
-                <TableBody>
-                {table.getRowModel().rows.map(row => (
-                    <TableRow key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                        <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                    ))}
-                    </TableRow>
-                ))}
-                </TableBody>
-            </Table>
-            </TableContainer>
-            <Box
-                sx={{
-                display: "flex",
-                justifyContent: "center",
-                mt: 3,
-                }}
-            >
-                <Fab
-                color="primary"
-                aria-label="add task"
-                onClick={handleNewTaskButton}
-                >
-                    <AddIcon />
-                </Fab>
-            </Box>
-            {editingTask && (
-                <Modal open={openModal} onClose={() => setOpenModal(false)}>
-                    <TaskDetail
-                        editingTask={editingTask}
-                        setEditingTask={setEditingTask}
-                        onSaveTask={onSaveTask}
-                        onDeleteTask={onDeleteTask}
-                        setOpenModal={setOpenModal}
-                        onAddNewTask={onAddNewTask}
-                        mode={mode}
-                    />
-                </Modal>
-            )}
-        </Box>    
-      </>
-    );
+    return isMobile ? (<MobileTable table={table}/>) : (<DesktopTable table={table}/>);
 }
